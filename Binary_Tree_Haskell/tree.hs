@@ -1,3 +1,5 @@
+data Folha a = Folha
+data No a = No a
 data Arvore a = No a (Arvore a) (Arvore a) | Folha
 ins e Folha = No e Folha Folha
 ins e (No x esq dir) | e == x = No x esq dir
