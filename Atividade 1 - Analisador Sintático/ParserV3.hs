@@ -7,25 +7,16 @@ import Text.Parsec.Token qualified as T
 import Text.ParserCombinators.Parsec (ParseError, Parser, char, choice, option, optionMaybe, parse, sepBy, sepBy1, sepEndBy, spaces, string, (<?>), (<|>))
 
 type Id = String
-
 type Bloco = [Comando]
 
 data Tipo = TDouble | TInt | TString | TVoid deriving (Show)
-
 data TCons = CDouble Double | CInt Integer deriving (Show)
-
 data Expr = Expr :+: Expr | Expr :-: Expr | Expr :*: Expr | Expr :/: Expr | Neg Expr | Const TCons | IdVar Id | Chamada Id [Expr] | Lit String deriving (Show)
-
 data ExprR = Expr :==: Expr | Expr :/=: Expr | Expr :<: Expr | Expr :>: Expr | Expr :<=: Expr | Expr :>=: Expr deriving (Show)
-
 data ExprL = ExprL :&: ExprL | ExprL :|: ExprL | Not ExprL | Rel ExprR deriving (Show)
-
 data Var = Id :#: Tipo deriving (Show)
-
 data Funcao = Id :->: ([Var], Tipo) deriving (Show)
-
 data Programa = Prog [Funcao] [(Id, [Var], Bloco)] [Var] Bloco deriving (Show)
-
 data Comando
   = If ExprL Bloco Bloco
   | While ExprL Bloco
@@ -114,7 +105,7 @@ exprR :: ParsecT String u Data.Functor.Identity.Identity ExprL
 exprR = do
   e1 <- expr
   o <- opR
-  Rel . o e1 <$> expr <?> "relacional"
+  Rel . o e1 <$> expr <?> "relacional expression"
 
 programa :: Parser Programa
 programa = do
@@ -177,7 +168,7 @@ defaultValue :: Tipo -> Expr
 defaultValue TInt = Const (CInt 0)
 defaultValue TDouble = Const (CDouble 0.0)
 defaultValue TString = Lit ""
-defaultValue TVoid = error "Tipo void não tem valor padrão"
+defaultValue TVoid = error "Tipo 'void' não tem valor default!"
 
 tipo :: Parsec String u Tipo
 tipo =
@@ -221,10 +212,8 @@ chamadaFuncao = do
 
 listaParametros :: ParsecT String u Data.Functor.Identity.Identity [Expr]
 listaParametros = parens (expr `sepBy` symbol ",") <|> return []
-
 listaParametros' :: Parsec String u [Expr]
 listaParametros' = expr `sepBy` symbol ","
-
 listaParametros'' :: Parsec String u [Expr]
 listaParametros'' =
   (symbol "," >> listaParametros')
@@ -287,8 +276,8 @@ parsePrograma = parse programa ""
 
 testParser :: String -> IO ()
 testParser input = case parsePrograma input of
-  Left err -> putStrLn $ "Erro de análise: " ++ show err
-  Right ast -> putStrLn $ "Árvore sintática abstrata:\n" ++ show ast
+  Left err -> putStrLn $ "Erro na análise: " ++ show err
+  Right ast -> putStrLn $ "Árvore Sintática Abstrata:\n" ++ show ast
 
 main :: IO ()
 main = do
