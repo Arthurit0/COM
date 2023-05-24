@@ -3,9 +3,8 @@ import Text.Parsec.Expr
 import qualified Text.Parsec.Token as T
 import Text.Parsec.Language
 
-
 type Id = String
-data Tipo = TDouble | TInt | TString | TVoid deriving Show
+data Tipo = TDouble | TInt | TString | TFloat | TVoid deriving Show
 data TCons = CDouble Double | CInt Integer deriving Show
 data Expr = Expr :+: Expr | Expr :-: Expr | Expr :*: Expr | Expr :/: Expr | Neg Expr | Const TCons | IdVar Id | Chamada Id [Expr] | Lit String deriving Show
 data ExprR = Expr :==: Expr | Expr :/=: Expr | Expr :<: Expr | Expr :>: Expr |Expr :<=: Expr | Expr :>=: Expr deriving Show
@@ -100,7 +99,8 @@ logico = buildExpressionParser tabelaL exprLog
 
 tipo = do {(reservada "int" >> return TInt) 
           <|> (reservada "double" >> return TDouble) 
-          <|> (reservada "string" >> return TString) 
+          <|> (reservada "string" >> return TString)
+          <|> (reservada "float" >> return TFloat) 
           <?> "type"}
 
 parametro = do
@@ -223,7 +223,7 @@ parser string = case runParser programa [] "Expressions" string of
     Right x -> print x
 
 runTeste = do
-    e <- readFile "teste.diq"
+    e <- readFile "teste1.j--"
     parser e
 
 main = do
