@@ -7,7 +7,7 @@ float maior (float a, float b)
   return b;
 }
 
-int fat (int n);
+int fat (int n)
 {
   int f;
   
