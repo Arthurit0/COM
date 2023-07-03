@@ -47,7 +47,7 @@ getVarTipo (_ :#: t) = t
 -- Funções que extraem o ID, o Tipo e os Parâmetros de uma função
 funcId (id :->: _) = id
 funcTipo (_ :->: (_, t)) = t
-funcParamentros (_ :->: (lp, _)) = lp
+funcParametros (_ :->: (lp, _)) = lp
 
 -- Funções que extraem o ID, a Variável e o Bloco de uma lista de funções
 listaFuncId (id, _, _) = id
@@ -152,8 +152,8 @@ verParametros'' id' (Chamada id lp) lv fs = do if length lp == length numP
                                                        return (Chamada id lp)
                                            where 
                                                  f = procFuncInList id fs
-                                                 flp = funcParamentros f
-                                                 numP = funcParamentros (procFuncInList id fs)
+                                                 flp = funcParametros f
+                                                 numP = funcParametros (procFuncInList id fs)
 
 -- A função 'idChamada' extrai o id de uma chamada de função.
 getIdChamada (Chamada id _) = id
@@ -217,7 +217,7 @@ verExpr id' (Chamada id lp) lv fs = do if funcTipo == E
                                where 
                                      chm = (Chamada id lp)
                                      funcTipo = procFuncId id fs
-                                     fp = funcParamentros (procFuncInList id fs)
+                                     fp = funcParametros (procFuncInList id fs)
 
 -- Verificando outras expressões
 verExpr id' expr lv fs = do a <- verExpr id' (exprA expr) lv fs
@@ -382,8 +382,8 @@ verProc' id' (Proc id lExpr) lv fs = do if length lExpr == length numP
                                                 return (Proc id lExpr) 
                                       where 
                                            f = procFuncInList id fs
-                                           lp = funcParamentros f
-                                           numP = funcParamentros (procFuncInList id fs)
+                                           lp = funcParametros f
+                                           numP = funcParametros (procFuncInList id fs)
 
 -- 'verProc' verifica os argumentos de uma chamada de procedimento.
 -- Esta função verifica cada argumento e considera conversões de tipo.
@@ -480,7 +480,7 @@ verReptVar (lv:lvs) |elemExiste getVarId lv lvs = (True, getVarId lv)
 
 -- 'verReptFuncParametro' verifica a repetição de parâmetros de funções
 verReptFuncParametro [] = return True
-verReptFuncParametro (fs:fss) = do let v = verReptVar (funcParamentros fs)
+verReptFuncParametro (fs:fss) = do let v = verReptVar (funcParametros fs)
                                    if fst v
                                    then do erro ("Na função '" ++ id ++ "':\n"
                                                  ++ "O parâmetro '" ++ snd v ++ "' foi declarado mais de uma vez")
@@ -513,7 +513,7 @@ verFuncao f fs = do vlv <- verVariaveis id lv
                     where 
                          id = listaFuncId f
                          t = procFuncId id fs
-                         lv = (listaFuncVar f) ++ (funcParamentros (procFuncInList id fs))
+                         lv = (listaFuncVar f) ++ (funcParametros (procFuncInList id fs))
                          b = listaFuncBloco f
 
 -- 'verListaFuncoes' verifica uma lista de definições de funções.
