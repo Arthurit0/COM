@@ -10,6 +10,7 @@ module ParserForSemantic (
        Programa(..),
        Bloco(..),
        Comando(..),
+       AtribFor(..),
        parserE,
        parserExpr,
        partida
@@ -32,7 +33,8 @@ data Var = Id :#: Tipo deriving (Eq, Show)
 data Funcao = Id :->: ([Var], Tipo) deriving (Eq, Show)     
 data Programa = Prog [Funcao] [(Id, [Var], Bloco)] [Var] Bloco deriving Show
 type Bloco = [Comando]
-data Comando = If ExprL Bloco Bloco | While ExprL Bloco | Atrib Id Expr | Leitura Id | Imp Expr | Ret (Maybe Expr) | Proc Id [Expr] deriving (Eq, Show)
+data AtribFor = AtribFor Id Expr deriving (Eq, Show)
+data Comando = If ExprL Bloco Bloco | While ExprL Bloco | For AtribFor ExprL AtribFor Bloco | Atrib Id Expr | Leitura Id | Imp Expr | Ret (Maybe Expr) | Proc Id [Expr] deriving (Eq, Show)
 
 -- Definições da linguagem: configuração de palavras reservadas
 definicao = emptyDef{
@@ -41,7 +43,7 @@ definicao = emptyDef{
          T.commentLine = "--",
          T.identStart = letter<|> char '_', 
          T.identLetter = alphaNum <|> char '_',
-         T.reservedNames = ["if", "else", "return", "while", "id",
+         T.reservedNames = ["if", "else", "return", "while", "for", "id",
                             "print", "read", "int", "string", "double", "float", "void"]
         }
 
@@ -146,9 +148,14 @@ listaCmd = do {c <- comando; cs <- listaCmd; return (c:cs)}
 comando = do{reservada "return"; e <- expressaoVazia; pontoVirgula; return e}
           <|>do{reservada "if"; l <- parenteses exprL; b <- bloco; s <- senao; return (If l b s)}
           <|>do{reservada "while"; l <- parenteses exprL; b <- bloco; return (While l b)}
+          <|> do { reservada "for"; simbolo "("; init <- atribFor; pontoVirgula; cond <- exprL; pontoVirgula; update <- atribFor; simbolo ")"; b <- bloco; return (For init cond update b)}
           <|>do{reservada "print"; e <- parenteses expr; pontoVirgula; return (Imp e)}
           <|>do{reservada "read"; id <- parenteses (identificador); pontoVirgula; return (Leitura id) }
           <|>comandoTry
+
+
+atribFor = do {id <- identificador; simbolo "="; e <- expr; return (AtribFor id e)}
+
 
 -- 'comandoTry' tenta analisar uma atribuição a um identificador ou uma chamada de função
 comandoTry = try comandoId <|> comandoFuncao

@@ -225,7 +225,7 @@ verExpr id' expr lv fs = do a <- verExpr id' (exprA expr) lv fs
                             verExprBin id' expr a b
                     
                           
--- Funções que extraem o primeiro e o segundo operando de uma operação relacional.
+-- Funções que extraem o primeiro e o seBlocogundo operando de uma operação relacional.
 exprRelA (a :==: _) = a
 exprRelA (a :/=: _) = a
 exprRelA (a :<: _) = a
@@ -323,6 +323,11 @@ elemExiste f id (e:es) |f id == f e = True
 verAtrib' id' (Atrib id expr) lv fs = do v <- verExpr id' expr lv fs
                                          return (Atrib id (snd v))
 
+verAtribFor id' (AtribFor id expr) lv fs = do
+  v <- verExpr id' expr lv fs
+  return (AtribFor id (snd v))
+
+
 -- 'verAtrib' verifica a atribuição de uma expressão a uma variável.
 -- Considera conversões de tipo.
 verAtrib id' (Atrib id expr) lv fs = do v <- verExpr id' expr lv fs
@@ -413,7 +418,6 @@ verProc id' (e:es) (p:ps) lv fs = do ve <- verExpr id' e lv fs
 
 -- 'verComando' verifica a validade de um comando individual. O tipo de comando determina o tipo de verificação realizado.
 -- Comandos: If, While, Atrib, Leitura, Imp, Ret, Proc
-
 verComando id' (If exprL b1 b2) t lv fs = do vL <- verExprL id' exprL lv fs
                                              vb1 <- verBloco id' b1 t lv fs
                                              vb2 <- verBloco id' b2 t lv fs
@@ -422,6 +426,13 @@ verComando id' (If exprL b1 b2) t lv fs = do vL <- verExprL id' exprL lv fs
 verComando id' (While exprL b) t lv fs = do vL <- verExprL id' exprL lv fs
                                             vb <- verBloco id' b t lv fs
                                             return (While vL vb)
+
+verComando id' (For init cond update b) t lv fs = do
+                                vInit <- verAtribFor id' init lv fs
+                                vCond <- verExprL id' cond lv fs
+                                vUpdate <- verAtribFor id' update lv fs
+                                vBloco <- verBloco id' b t lv fs
+                                return (For vInit vCond vUpdate vBloco)
 
 verComando id' (Atrib id expr) _ lv fs = if elemExiste getVarId var lv
                                         then do v <- verAtrib id' atr lv fs

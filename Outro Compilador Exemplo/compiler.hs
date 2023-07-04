@@ -48,7 +48,7 @@ data Programa = Prog [Funcao] [(Id, [Var], Bloco)] [Var] Bloco deriving Show
 
 type Bloco = [Comando]
 
-data Comando = If ExprL Bloco Bloco | While ExprL Bloco | Atrib Id Expr | Leitura Id | Imp Expr | Ret (Maybe Expr) | Proc Id [Expr] deriving Show
+data Comando = If ExprL Bloco Bloco | While ExprL Bloco | For Atrib Exprl Atrib Bloco | Atrib Id Expr | Leitura Id | Imp Expr | Ret (Maybe Expr) | Proc Id [Expr] deriving Show
 
 lingDef = emptyDef
           { T.commentStart      = "{-"
